@@ -4,5 +4,10 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-> Add Markdown syntax content to file `_tabs/about.md`{: .filepath } and it will show up on this page.
-{: .prompt-tip }
+## Hello 👋
+
+I am Otmane Boughaba, interested in Ai research, Machine Learning, Deep Learning and building end-to-end solutions to solve real-world problems 🚀
+Welcome to my blog, where I’ll be writing about whatever I find interesting 📝
+
+### Contact
+The best way to get in touch is to send me an email at [otmaneboughaba@gmail.com](mailto:otmaneboughaba@gmail.com) or connect with me on [Linkedin](https://www.linkedin.com/in/otmaneboughaba).
