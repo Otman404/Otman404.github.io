@@ -46,7 +46,7 @@ huggingface-cli download TheBloke/zephyr-7B-beta-GGUF zephyr-7b-beta.Q5_K_M.gguf
 
 In the command above, we had to specify the user (TheBloke), repository name (zephyr-7B-beta-GGUF) and the specific file to download (zephyr-7b-beta.Q5_K_M.gguf).
 
-### 3. Downloading Ollama
+### 2. Installing Ollama
 
 Ollama is a tool that helps us run llms locally. The Ollama [library](https://ollama.ai/library) contains a wide range of models that can be easily run by using the command```ollama run [model_name]```
 
@@ -56,7 +56,7 @@ On Linux, Ollama can be installed using:
 curl https://ollama.ai/install.sh | sh
 ```
 
-### 2. Creating Modelfile
+### 3. Creating Modelfile
 
 [Modelfile](https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md) is where we add our model's parameters and instructions.
 
@@ -85,7 +85,7 @@ SYSTEM """You are an assistant for PhD researchers, you help them find infos fro
 > Note that certain parameters may vary from one model to another; for instance, the STOP and TEMPLATE parameters values are specific to this model and can be located on [Zephyr's page](https://huggingface.co/HuggingFaceH4/zephyr-7b-beta).
 {: .prompt-info }
 
-### 3. Build the model
+### 4. Build the model with Modelfile
 
 ```bash
 ollama create zephyr-local -f Modelfile
@@ -97,7 +97,7 @@ We can see the list of the created models using:
 ollama list
 ```
 
-### 4. Run the model
+### 5. Run the model
 
 Lastly, we can run the model using:
 
