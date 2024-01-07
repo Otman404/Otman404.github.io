@@ -2,7 +2,7 @@
 title: Artwork Similarity Search - Exploring the Power of Vector Databases
 date: 2023-06-29
 categories: [project, tutorial]
-tags: [projects data-science software-engineering]     # TAG names should always be lowercase
+tags: [projects, data-science, software-engineering]     # TAG names should always be lowercase
 image:
   path: /assets/headers/artwork-search-header.webp
 #   lqip: 
