@@ -1,6 +1,6 @@
 ---
 title: Use custom LLMs from Hugging Face locally with Ollama
-date: 2023-01-07
+date: 2024-01-07
 published: true
 categories: [tutorial]
 tags: [llm, huggingface, ollama]     # TAG names should always be lowercase
