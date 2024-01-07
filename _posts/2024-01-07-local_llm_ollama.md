@@ -140,7 +140,7 @@ Looks good!
 In case we want to delete the model, we simply run:
 
 ```bash
-ollama rm zephyre-initial
+ollama rm zephyr-local
 ```
 
 That's it! We succesffuly run a powerfull LLM locally without the need of expensive GPUs.
