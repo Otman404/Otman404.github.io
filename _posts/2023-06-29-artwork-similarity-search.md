@@ -4,7 +4,10 @@ date: 2023-06-29
 categories: [project, tutorial]
 tags: [projects, data-science, software-engineering]     # TAG names should always be lowercase
 image:
-  path: /assets/headers/artwork-search-header.webp
+  path: /assets/headers/artwork.png
+  alt: "Image Credit: <a href='https://arielrdavis.com'>Ariel Davis</a>"
+#   caption: Credit <a href="https://arielrdavis.com">Ariel Davis</a> 
+
 #   lqip: 
 ---
 <!-- ---

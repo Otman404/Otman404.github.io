@@ -16,11 +16,10 @@ timezone: Africa/Casablanca
 
 title: Otmane Boughaba. # the main title
 
-tagline: "Decoding the AI Hype: Bridging the Gap Between Expectations and Reality." # it will display as the sub-title
+tagline: "AI Engineer | Machine Learning | Deep Learning | LLMs | MLOps" # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
-  I am Otmane Boughaba, interested in Ai research, Machine Learning, Deep Learning and building end-to-end solutions to solve real-world problems 🚀
-  Welcome to my blog, where I'll be writing about whatever I find interesting 📝
+  Decoding the AI Hype: Bridging the Gap Between Expectations and Reality.
 # Fill in the protocol & hostname for your site.
 # e.g. 'https://username.github.io', note that it does not end with a '/'.
 url: "https://otmaneboughaba.com"
