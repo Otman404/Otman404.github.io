@@ -1,6 +1,6 @@
 ---
 title: Building a Local RAG api with LlamaIndex, Qdrant, Ollama and FastAPI
-date: 2024-01-18
+date: 2024-02-01
 published: true
 categories: [project]
 tags: [llm, llamaindex, huggingface, ollama, fastapi]     # TAG names should always be lowercase
