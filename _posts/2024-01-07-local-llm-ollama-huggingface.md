@@ -7,6 +7,7 @@ tags: [llm, huggingface, ollama]     # TAG names should always be lowercase
 image:
   path: /assets/headers/hg-ollama.webp
 #   lqip: 
+render_with_liquid: false
 ---
 
 ## Introduction
@@ -48,7 +49,7 @@ In the command above, we had to specify the user (TheBloke), repository name (ze
 
 ### 2. Installing Ollama
 
-Ollama is a tool that helps us run llms locally. The Ollama [library](https://ollama.ai/library) contains a wide range of models that can be easily run by using the command```ollama run [model_name]```
+Ollama is a tool that helps us run llms locally. The Ollama [library](https://ollama.ai/library) contains a wide range of models that can be easily run by using the command```ollama run <model_name>```
 
 On Linux, Ollama can be installed using:
 
@@ -62,7 +63,7 @@ curl https://ollama.ai/install.sh | sh
 
 So let's create a Modelfile with the following content:
 
-```dockerfile
+```text
 FROM models/zephyr-models/zephyr-7b-beta.Q5_K_M.gguf
 PARAMETER num_ctx 3900
 PARAMETER temperature 0.7
