@@ -1,8 +1,8 @@
 ---
 title: Artwork Similarity Search - Exploring the Power of Vector Databases
 date: 2023-06-29
-categories: [project, tutorial]
-tags: [projects, data-science, software-engineering]     # TAG names should always be lowercase
+categories: [project]
+tags: [data-science, software-engineering, cloud, gcp]     # TAG names should always be lowercase
 image:
   path: /assets/headers/artwork.png
   alt: "Image Credit: <a href='https://arielrdavis.com'>Ariel Davis</a>"
