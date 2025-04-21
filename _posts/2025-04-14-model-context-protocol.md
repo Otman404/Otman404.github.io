@@ -283,6 +283,8 @@ In this case, we'll need to add this config to Claude Desktop config file to con
 
 And voila! We just built an mcp server 🚀 
 
+> You can find all the code used in this article in the [Github Repo](https://github.com/Otman404/finance-mcp-server)
+{: .prompt-info }
 
 ## Final Notes
 
