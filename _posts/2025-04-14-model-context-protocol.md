@@ -1,5 +1,5 @@
 ---
-title: Model Context Protocol
+title: Model Context Protocol - Let's build an MCP server in Python
 date: 2025-04-13
 published: true
 categories: [tutorial]
