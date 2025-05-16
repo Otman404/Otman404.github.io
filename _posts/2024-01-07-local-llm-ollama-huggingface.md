@@ -2,7 +2,7 @@
 title: Use custom LLMs from Hugging Face locally with Ollama
 date: 2024-01-07
 published: true
-categories: [tutorial]
+categories: [tutorial, llms]
 tags: [llm, huggingface, ollama]     # TAG names should always be lowercase
 image:
   path: /assets/headers/hg-ollama.webp

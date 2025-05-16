@@ -2,7 +2,7 @@
 title: Building a Local RAG api with LlamaIndex, Qdrant, Ollama and FastAPI
 date: 2024-02-01
 published: true
-categories: [project]
+categories: [project, llms, rag]
 tags: [llm, rag, llamaindex, huggingface, ollama, fastapi]     # TAG names should always be lowercase
 image:
   path: /assets/headers/research-rag.png
@@ -56,16 +56,16 @@ We'll follow the common flow of a RAG pipeline, which is a bit similar to a stan
 ### 1. Loading
 
 First, we need to get some data, in our case, research papers.
-Let's create a python script to quickly download papers from [arxiv.org](https://arxiv.org/) using some keywords.
+Let's create a python script to quickly download papers from [arxiv.org](https://arxiv.org/) based on some search keywords.
 Luckily, there's already a [python wrapper](https://pypi.org/project/arxiv/) for the arxiv api.
 
-The following function is responsible for downloading research papers into a folder.
+The following function is responsible for downloading research papers into a given path.
 
 ```python
 def download_papers(self, search_query, download_path, max_results):
     self._create_data_folder(download_path)
     client = arxiv.Client()
-
+    logger.info("Searching papers from arxiv...", query=search_query)
     search = arxiv.Search(
         query=search_query,
         max_results=max_results,
@@ -73,16 +73,14 @@ def download_papers(self, search_query, download_path, max_results):
     )
 
     results = list(client.results(search))
-    for paper in tqdm(results):
+    for i, paper in enumerate(results):
         if os.path.exists(download_path):
             paper_title = (paper.title).replace(" ", "_")
             paper.download_pdf(dirpath=download_path, filename=f"{paper_title}.pdf")
-            print(f"{paper.title} Downloaded.")
-
+            logger.info(
+                f"{i+1}/{len(results)} PDF Downloaded", pdf_name=paper.title
+            )
 ```
-
-Llamaindex supports variaty of [Data Loaders](https://llamahub.ai/), in our case, our data will be a bunch of PDFs in a folder, which means we can use [`SimpleDirectoryReader`](https://docs.llamaindex.ai/en/stable/examples/data_connectors/simple_directory_reader.html)
-
 ### 2. Indexing / Storing
 
 Indexing involves structuring and representing our data in a way that facilitates storage, querying, and feeding to an LLM. Llamaindex provides several methods for accomplishing this task.
@@ -119,34 +117,49 @@ docker run -p 6333:6333 -v ~/qdrant_storage:/qdrant/storage:z qdrant/qdrant
 
 Then we can access our database UI from <http://localhost:6333/dashboard>
 
+
+Llamaindex supports variaty of [Data Loaders](https://llamahub.ai/), in our case, our data will be a bunch of PDFs in a folder, which means we can use [`SimpleDirectoryReader`](https://docs.llamaindex.ai/en/stable/examples/data_connectors/simple_directory_reader.html)
+
 The following function is responsible for loading, chunking, embedding and storing our data.
 
 ```python
 def ingest(self, embedder, llm):
-    print("Indexing data...")
-    # Loading
-    documents = SimpleDirectoryReader(self.config["data_path"]).load_data()
+    logger.info("Indexing data...")
+    documents = SimpleDirectoryReader(data_path).load_data()
 
-    client = qdrant_client.QdrantClient(url=self.config["qdrant_url"])
+    client = qdrant_client.QdrantClient(url=qdrant_url)
     qdrant_vector_store = QdrantVectorStore(
-        client=client, collection_name=self.config["collection_name"]
+        client=client, collection_name=collection_name
     )
     storage_context = StorageContext.from_defaults(vector_store=qdrant_vector_store)
-    service_context = ServiceContext.from_defaults(
-        llm=llm, embed_model=embedder, chunk_size=self.config["chunk_size"]
-    )
 
-    # Chunking + Embedding + Storing
+    Settings.llm = None
+    Settings.embed_model = embedder
+    Settings.chunk_size = chunk_size
     index = VectorStoreIndex.from_documents(
-        documents, storage_context=storage_context, service_context=service_context
+        documents, storage_context=storage_context, Settings=Settings
     )
-    print(
-        f"Data indexed successfully to Qdrant. Collection: {self.config['collection_name']}"
+    logger.info(
+        "Data indexed successfully to Qdrant",
+        collection=collection_name,
     )
     return index
 ```
 
-> The full code of `Data` class can be found here: [data.py](https://github.com/Otman404/local-rag-llamaindex/blob/master/rag/data.py)
+Let's ingest some research papers about LLMs into our Vector Database. We'll do that by running the python script we just created:
+
+```python
+uv run data/data.py --query "LLM" --max 5 --ingest
+```
+
+`--query`: search keyword for downloading research papers from Arxiv.
+
+`--max`: Limits the results.
+
+`--ingest`: Ingests the downloaded papers into the Qdrant database.
+
+
+> The full code of `Data` class can be found here: [data.py](https://github.com/Otman404/local-rag-llamaindex/blob/master/data/data.py)
 {: .prompt-tip}
 
 We can see that our collection is now created
@@ -156,7 +169,7 @@ We can see that our collection is now created
 
 ### 3. Querying
 
-Now that we've successfully loaded our data (research papers) into our vector store (Qdrant), we can begin querying it to retrieve relevant data for feeding to our LLM.
+Now that we've successfully loaded our data (research papers) into our vector store (Qdrant), we can begin querying it to retrieve relevant data to be used by our LLM.
 
 Let's begin by crafting a function that sets up our Qdrant index, which will serve as our query engine.
 
@@ -164,21 +177,21 @@ Let's begin by crafting a function that sets up our Qdrant index, which will ser
 
 ```python
 def qdrant_index(self):
-    client = qdrant_client.QdrantClient(url=self.config["qdrant_url"])
+    client = qdrant_client.QdrantClient(url=qdrant_url)
     qdrant_vector_store = QdrantVectorStore(
-        client=client, collection_name=self.config['collection_name']
+        client=client, collection_name=collection_name
     )
-    service_context = ServiceContext.from_defaults(
-        llm=self.llm, embed_model=self.load_embedder(), chunk_size=self.config["chunk_size"]
-    )
+    Settings.llm = self.llm
+    Settings.embed_model = self.load_embedder()
+    Settings.chunk_size = chunk_size
 
     index = VectorStoreIndex.from_vector_store(
-        vector_store=qdrant_vector_store, service_context=service_context
+        vector_store=qdrant_vector_store, settings=Settings
     )
     return index
 ```
 
-> Code from: [rag.py](https://github.com/Otman404/local-rag-llamaindex/blob/master/rag/rag.py)
+> Code from: [rag.py](https://github.com/Otman404/local-rag-llamaindex/blob/master/api/rag.py)
 {: .prompt-tip}
 
 #### LLM
@@ -218,11 +231,20 @@ If the user asks something that does not exist within the provided context, Answ
 """
 ```
 
+The Modelfile basically contains the parameters used by the LLM and a system prompt to improve how the it will behave in our context.
+
 Next, we create our model using the Modelfile.
 
 ```bash
 ollama create research_assistant -f Modelfile
 ```
+
+This command will make our model available to Ollama, you can check that by running:
+
+```bash
+ollama list
+```
+You should see the model we just created.
 
 Then, we start the model server:
 
@@ -252,46 +274,56 @@ class Response(BaseModel):
 After initiating the llm, qdrant index and our FastAPI app:
 
 ```python
-llm = Ollama(model=config["llm_name"], url=config["llm_url"])
-rag = RAG(config_file=config, llm=llm)
+llm = Ollama(model=llm_name, base_url=llm_url)
+rag = RAG(llm=llm)
 index = rag.qdrant_index()
-
-
-app = FastAPI()
 ```
 
 We'll create a route that receives a `Query` and returns a `Response`, as defined in our pydantic classes.
 
 ```python
-a = "You can only answer based on the provided context. If a response cannot be formed strictly using the context, politely say you don’t have knowledge about that topic"
+prompt = "You can only answer based on the provided context. If a response cannot be formed strictly using the context, politely say you don’t have knowledge about that topic"
 
 @app.post("/api/search", response_model=Response, status_code=200)
 def search(query: Query):
 
-    query_engine = index.as_query_engine(similarity_top_k=query.similarity_top_k, output=Response, response_mode="tree_summarize", verbose=True)
-    response = query_engine.query(query.query + a)
+    query_engine = index.as_query_engine(
+        similarity_top_k=query.similarity_top_k,
+        output=Response,
+        response_mode="tree_summarize",
+        verbose=True,
+    )
+    response = query_engine.query(query.query + prompt)
     response_object = Response(
-        search_result=str(response).strip(), source=[response.metadata[k]["file_path"] for k in response.metadata.keys()][0]
+        search_result=str(response).strip(),
+        source=[response.metadata[k]["file_path"] for k in response.metadata.keys()][0],
     )
     return response_object
 ```
 
-> Code from: [app.py](https://github.com/Otman404/local-rag-llamaindex/blob/master/app.py)
+> Code from: [main.py](https://github.com/Otman404/local-rag-llamaindex/blob/master/api/main.py)
 {: .prompt-tip}
 
-Regarding the config file used throughout the project:
+Here's the `.env` file containing the parameters used in the project:
 
-```yaml
-data_path: "data/"
-llm_url: "http://localhost:11434"
-llm_name: "research_assistant"
-embedding_model: "sentence-transformers/all-mpnet-base-v2"
-qdrant_url: "http://localhost:6333"
-collection_name: "researchpapers"
-chunk_size: 1024
+```properties
+DATA_PATH=papers/
+LLM_URL=http://localhost:11434
+LLM_NAME=research_assistant
+EMBEDDING_MODEL=sentence-transformers/all-mpnet-base-v2
+QDRANT_URL=http://localhost:6333
+COLLECTION_NAME=researchpapers
+CHUNK_SIZE=1024
 ```
 
-Now, Let's try the api with the following request:
+
+Let's run the fastapi server:
+
+```bash
+fastapi run api/main.py
+```
+
+And try the api with the following request:
 
 ```json
 {
@@ -317,3 +349,7 @@ In summary, the project's goal was to create a local RAG API using LlamaIndex, Q
 
 >Don't forget to visit the project [Github repository](https://github.com/Otman404/local-rag-llamaindex)
 {: .prompt-tip}
+
+## What's next
+
+In the [next article](https://otmaneboughaba.com/posts/dockerize-rag-application/), we'll learn how to Dockerize our RAG application step by step. We'll containerize each component: rag api, the data ingestion tool, the Qdrant vector database, and the Ollama LLM runtime, and orchestrate them all using Docker Compose.

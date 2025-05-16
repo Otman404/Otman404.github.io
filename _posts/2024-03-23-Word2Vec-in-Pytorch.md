@@ -2,7 +2,7 @@
 title: Simple Word2Vec implementation in PyTorch
 date: 2024-03-23
 published: true
-categories: [nlp]
+categories: [nlp, deeplearning, pytorch]
 tags: [deeplearning, nlp, pytorch]     # TAG names should always be lowercase
 image:
   path: assets/headers/word2vec.png

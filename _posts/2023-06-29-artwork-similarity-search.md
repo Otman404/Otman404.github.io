@@ -1,7 +1,7 @@
 ---
 title: Artwork Similarity Search - Exploring the Power of Vector Databases
 date: 2023-06-29
-categories: [project]
+categories: [project, vector_search]
 tags: [data-science, software-engineering, cloud, gcp]     # TAG names should always be lowercase
 image:
   path: /assets/headers/artwork.png
